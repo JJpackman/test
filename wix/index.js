@@ -1,30 +1,43 @@
 function solution(S, K) {
-  const delimeter = " ";
-  const words = S.split(delimeter);
-  const msgs = [];
-  let tempMsg = "";
-  let msgCount = 0;
+  const isSValid = /^([a-z]+)(\u0020{1}[a-z]+)*$/i.test(S);
+  const isKValid = Number.isInteger(K) && K > 0 && K <= 500;
 
-  for (let i = 0; i < words.length; i++) {
-    if (words[i].length > K) {
-      return -1;
-    } else {
-      if (tempMsg.length + words[i].length > K) {
-        msgs.push(tempMsg);
-        tempMsg = words[i];
-        msgCount++;
-      } else {
-        tempMsg += tempMsg.length > 0 ? delimeter + words[i] : words[i];
-      }
+  try {
+    if (!(isSValid && isKValid)) {
+      throw new Error("Wrong arguments");
     }
-  }
 
-  if (tempMsg.length > 0) {
-    msgs.push(tempMsg);
-    msgCount++;
-  }
+    const delimeter = " ";
+    const words = S.split(delimeter);
+    const checkWordLen = word => word.length <= K;
 
-  return msgCount;
+    if (words.every(checkWordLen)) {
+      const [fWord, ...otherWords] = words;
+      let currMsg = fWord;
+      const resultMsgs = otherWords.reduce((msgs, word) => {
+        const newMsg = currMsg.concat(delimeter, word);
+        if (checkWordLen(newMsg)) {
+          currMsg = newMsg;
+        } else {
+          msgs.push(currMsg);
+          currMsg = word;
+        }
+
+        return msgs;
+      }, []);
+
+      if (currMsg.length > 0) {
+        resultMsgs.push(currMsg);
+        currMsg = "";
+      }
+
+      return resultMsgs.length;
+    } else {
+      return -1;
+    }
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 module.exports = solution;
